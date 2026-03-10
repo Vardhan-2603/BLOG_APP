@@ -1,13 +1,12 @@
 import exp from 'express'
-import { register } from '../Services/auth_service.js'
-import { UserTypeModel } from '../Models/user_model.js';
+import { register } from '../services/auth_service.js'
 import { ArticleTypeModel } from '../Models/article_model.js'
 import { checkAuthor } from '../Middlewares/check_author.js'
-import { authenticate } from '../Services/auth_service.js';
+import { authenticate } from '../services/auth_service.js';
 import { verifyToken } from '../Middlewares/verify_token.js';
 export const authorRoute=exp.Router();
 
-//Register autho(public)
+//Register author(public)
 authorRoute.post('/users',async(req,res)=>{
      //get user obj from req
      let userObj =req.body;
@@ -17,7 +16,7 @@ authorRoute.post('/users',async(req,res)=>{
      res.status(201).json({message:"User Created",payloadd:newUserObj});
 })
 //create artical (protected)
-authorRoute.post('/article',verifyToken,checkAuthor,async(req,res)=>{
+authorRoute.post('/article',verifyToken("AUTHOR"),async(req,res)=>{
      //get artical from req
      let artical = req.body;
      //create artical document
@@ -25,10 +24,10 @@ authorRoute.post('/article',verifyToken,checkAuthor,async(req,res)=>{
      //save
      let createArticalDoc = await newArticalDoc.save()
      //send res
-     return res.status(401).json({messang:"artical created"})
+      res.status(201).json({message:"artical created",payload:createArticalDoc})
 })
 //read articals of author(protected)
-authorRoute.get("/articles/:authorId",verifyToken,checkAuthor,async(req,res)=>{
+authorRoute.get("/articles/:authorId",verifyToken("AUTHOR"),async(req,res)=>{
      //get authorID
      let authorId= req.params.authorId;
      //read artical by the author
@@ -37,7 +36,7 @@ authorRoute.get("/articles/:authorId",verifyToken,checkAuthor,async(req,res)=>{
      return res.status(400).json({message:"article",payload:article})
 })
 //edit aritcal (protected)
-authorRoute.put("/articles",verifyToken,checkAuthor,async(req,res)=>{
+authorRoute.put("/articles",verifyToken("AUTHOR"),async(req,res)=>{
      //get modified artical from request
      let {author,articleId,title,category,content}=req.body;
      //find the article
@@ -58,19 +57,34 @@ authorRoute.put("/articles",verifyToken,checkAuthor,async(req,res)=>{
 })
 
 //delect(soft copy) aritical (protected)
-authorRoute.put('/articles',verifyToken,checkAuthor,async(req,res)=>{
-     let { author, articleId }= req.body;
+authorRoute.patch('/articles/:id',verifyToken("AUTHOR"),async(req,res)=>{
+     const { id } = req.params;
+     const { isArticleActive } = req.body;
      //check article
-     let article=await ArticleTypeModel.findById(articleId)
+     let article=await ArticleTypeModel.findById(id);
      if(!article){
           return res.status(400).json({message:"article not found"});
      }
-     //update statues to in active
-     let updatedArticle=await ArticleTypeModel.findByIdAndUpdate(articleId,{
-          $set:{isArticalActive:false}
-     },{
-          new:true
-     })
+     // console.log(req.user.userId,article.author.toString())
+     // AUTHOR can only modify their own articles
+     if (req.user.role === "AUTHOR" && 
+     article.author.toString() !== req.user.userId) {
+     return res
+     .status(403)
+     .json({ message: "Forbidden. You can only modify your own articles" });
+     }
+     // Already in requested state
+     if(article.isArticalActive===isArticleActive){
+          return res.status(400).json({
+               message:`Article is already ${isArticleActive?"active":"deleted"}`
+          })
+     }
+
+     // update status
+     article.isArticalActive=isArticleActive;
+     await article.save();
+
      //return res
-     return res.status(400).json({message:"changed to inactive",payload:updatedArticle})
+     return res.status(400).json({message:`Article ${isArticleActive ? "restored" : "deleted"} successfully,article`})
 })
+

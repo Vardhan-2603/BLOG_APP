@@ -1,7 +1,7 @@
 import exp from "express";
 import bcrypt from "bcryptjs";
-import { authenticate } from "../Services/auth_service.js";
-import { UserTypeModel } from "../Models/user_model.js";
+import { authenticate } from "../services/auth_service.js";
+import { UserTypeModel } from "../models/user_model.js";
 export const commonRoute=exp.Router();
 
 //login

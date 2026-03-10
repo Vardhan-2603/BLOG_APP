@@ -6,9 +6,12 @@ import { authorRoute } from './APIs/author_api.js'
 import { adminRoute } from './APIs/admin_api.js'
 import { commonRoute } from './APIs/common_api.js';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 
 config() //process.env
 const  app=exp()
+// use cors middleware
+app.use(cors({origin:['http://localhost:5173'],credentials:true}));
 //add body parser middleware
 app.use(exp.json());
 //add c
