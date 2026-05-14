@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Github, Twitter } from 'lucide-react';
+import { BookOpen, Globe, Mail } from 'lucide-react';
 
 function Footer() {
   return (
@@ -15,11 +15,11 @@ function Footer() {
         </p>
 
         <div className="flex items-center gap-4 text-slate-400">
-          <a href="#" className="hover:text-brand-500 transition-colors">
-            <Twitter size={18} />
+          <a href="#" className="hover:text-brand-500 transition-colors" title="Website">
+            <Globe size={18} />
           </a>
-          <a href="#" className="hover:text-brand-500 transition-colors">
-            <Github size={18} />
+          <a href="#" className="hover:text-brand-500 transition-colors" title="Contact Us">
+            <Mail size={18} />
           </a>
         </div>
       </div>
