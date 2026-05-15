@@ -38,7 +38,7 @@ function Header() {
               <BookOpen size={20} className="text-white" />
             </div>
             <span className="font-bold text-xl tracking-tight text-slate-900 group-hover:text-brand-600 transition-colors">
-              ArticleHub
+              BLOGAPP
             </span>
           </Link>
 
